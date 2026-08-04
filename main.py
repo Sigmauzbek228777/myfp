@@ -45,20 +45,19 @@ def main():
         send_alert(f"❌ Ошибка входа:\n{e}")
         return
 
-    while True:
-        try:
-            account.raise_lots()
+   while True:
+    try:
+        print(account.categories)
 
-            print("Лоты подняты.")
-            send_alert("✅ Лоты успешно подняты.")
+        send_alert("Категории выведены в лог.")
 
-            time.sleep(14400)
+        break
 
-        except Exception as e:
-            print(e)
-            send_alert(f"⚠ Ошибка:\n{e}")
+    except Exception as e:
+        print(e)
+        send_alert(f"⚠ Ошибка:\n{e}")
 
-            time.sleep(60)
+        break
 
 
 class Handler(BaseHTTPRequestHandler):
