@@ -45,19 +45,24 @@ def main():
         send_alert(f"❌ Ошибка входа:\n{e}")
         return
 
-   while True:
-    try:
-        print(account.categories)
-
-        send_alert("Категории выведены в лог.")
-
-        break
-
-    except Exception as e:
+      except Exception as e:
         print(e)
-        send_alert(f"⚠ Ошибка:\n{e}")
+        send_alert(f"❌ Ошибка входа:\n{e}")
+        return
 
-        break
+    while True:
+        try:
+            print(account.categories)
+
+            send_alert("Категории выведены в лог.")
+
+            break
+
+        except Exception as e:
+            print(e)
+            send_alert(f"⚠ Ошибка:\n{e}")
+
+            break
 
 
 class Handler(BaseHTTPRequestHandler):
