@@ -15,18 +15,18 @@ PROXY_URL = os.getenv("PROXY")
 bot = telebot.TeleBot(TOKEN)
 
 
-def send_alert(message):
+def send_alert(text):
     try:
         bot.send_message(
             ADMIN_ID,
-            f"🤖 [FunPay Bot]\n{message}"
+            f"🤖 [FunPay Bot]\n{text}"
         )
     except Exception as e:
         print("Ошибка Telegram:", e)
 
 
 def funpay_worker():
-    print("Запуск FunPay бота...")
+    print("Запуск FunPay...")
 
     proxy = None
 
@@ -52,7 +52,7 @@ def funpay_worker():
         )
 
     except Exception as e:
-        print("Ошибка входа:", e)
+        print("Ошибка входа:", repr(e))
 
         send_alert(
             f"❌ Ошибка входа:\n{repr(e)}"
@@ -61,28 +61,26 @@ def funpay_worker():
         return
 
 
-    # Диагностика поднятия лотов
+    # Получаем категории
     try:
-        print("Проверка raise_modal...")
+        print("Получение категорий...")
 
-        modal = account.get_raise_modal()
+        categories = account.get_sorted_categories()
 
-        print("================")
-        print(type(modal))
-        print(repr(modal))
-        print("================")
+        print("====================")
+        print(categories)
+        print("====================")
 
         send_alert(
-            "✅ Проверка категорий завершена.\n"
-            "Смотри логи Render."
+            "✅ Категории получены.\n"
+            "Проверь логи Render."
         )
 
     except Exception as e:
-        print("Ошибка get_raise_modal:")
-        print(repr(e))
+        print("Ошибка категорий:", repr(e))
 
         send_alert(
-            f"⚠ Ошибка получения категорий:\n{repr(e)}"
+            f"⚠ Ошибка категорий:\n{repr(e)}"
         )
 
 
@@ -102,12 +100,10 @@ class Handler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
 
-    thread = threading.Thread(
+    threading.Thread(
         target=funpay_worker,
         daemon=True
-    )
-
-    thread.start()
+    ).start()
 
 
     port = int(
@@ -123,7 +119,7 @@ if __name__ == "__main__":
     )
 
     print(
-        f"Web server started on {port}"
+        f"Server started on {port}"
     )
 
     server.serve_forever()
