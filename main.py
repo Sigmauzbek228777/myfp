@@ -91,25 +91,17 @@ class Handler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
 
-    print("MAIN START")
+    print("MAIN START", flush=True)
 
-    threading.Thread(
-        target=funpay_worker,
-        daemon=True
-    ).start()
+    funpay_worker()
 
-    port = int(
-        os.getenv(
-            "PORT",
-            10000
-        )
-    )
+    port = int(os.getenv("PORT", 10000))
 
     server = HTTPServer(
         ("0.0.0.0", port),
         Handler
     )
 
-    print("WEB START", port)
+    print("WEB START", port, flush=True)
 
     server.serve_forever()
