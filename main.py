@@ -1,26 +1,32 @@
 import os
+import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
 import telebot
 from FunPayAPI import Account
-from http.server import BaseHTTPRequestHandler, HTTPServer
-import threading
+
 
 TOKEN = os.getenv("TOKEN")
 ADMIN_ID = int(os.getenv("ADMIN_ID"))
 GOLDEN_KEY = os.getenv("GOLDEN_KEY")
 PROXY_URL = os.getenv("PROXY")
 
+
 bot = telebot.TeleBot(TOKEN)
 
 
-def send_alert(text):
+def send_alert(message):
     try:
-        bot.send_message(ADMIN_ID, f"🤖 [FunPay Bot]\n{text}")
+        bot.send_message(
+            ADMIN_ID,
+            f"🤖 [FunPay Bot]\n{message}"
+        )
     except Exception as e:
-        print(f"Ошибка Telegram: {e}")
+        print("Ошибка Telegram:", e)
 
 
-def main():
-    print("Запуск бота...")
+def funpay_worker():
+    print("Запуск FunPay бота...")
 
     proxy = None
 
@@ -36,27 +42,48 @@ def main():
             proxy=proxy
         ).get()
 
-        print(f"Вход выполнен: {account.username}")
-        send_alert(f"✅ Бот запущен.\nАккаунт: {account.username}")
+        print(
+            f"Вход выполнен: {account.username}"
+        )
+
+        send_alert(
+            f"✅ Бот запущен\n"
+            f"Аккаунт: {account.username}"
+        )
 
     except Exception as e:
-        print(e)
-        send_alert(f"❌ Ошибка входа:\n{e}")
+        print("Ошибка входа:", e)
+
+        send_alert(
+            f"❌ Ошибка входа:\n{repr(e)}"
+        )
+
         return
 
+
+    # Диагностика поднятия лотов
     try:
+        print("Проверка raise_modal...")
+
         modal = account.get_raise_modal()
 
-        print("=== RAISE MODAL ===")
+        print("================")
         print(type(modal))
         print(repr(modal))
-        print("===================")
+        print("================")
 
-        send_alert("Диагностика поднятия лотов завершена.")
+        send_alert(
+            "✅ Проверка категорий завершена.\n"
+            "Смотри логи Render."
+        )
 
     except Exception as e:
-        print(f"Ошибка get_raise_modal: {e}")
-        send_alert(f"⚠ Ошибка получения категорий:\n{e}")
+        print("Ошибка get_raise_modal:")
+        print(repr(e))
+
+        send_alert(
+            f"⚠ Ошибка получения категорий:\n{repr(e)}"
+        )
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -64,7 +91,9 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         self.end_headers()
-        self.wfile.write(b"Bot is running!")
+        self.wfile.write(
+            b"Bot is running"
+        )
 
     def do_HEAD(self):
         self.send_response(200)
@@ -72,8 +101,29 @@ class Handler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    threading.Thread(target=main, daemon=True).start()
 
-    port = int(os.getenv("PORT", 10000))
-    server = HTTPServer(("0.0.0.0", port), Handler)
+    thread = threading.Thread(
+        target=funpay_worker,
+        daemon=True
+    )
+
+    thread.start()
+
+
+    port = int(
+        os.getenv(
+            "PORT",
+            10000
+        )
+    )
+
+    server = HTTPServer(
+        ("0.0.0.0", port),
+        Handler
+    )
+
+    print(
+        f"Web server started on {port}"
+    )
+
     server.serve_forever()
