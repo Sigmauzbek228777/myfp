@@ -18,6 +18,8 @@ def send_alert(message):
         bot.send_message(ADMIN_ID, f"🤖 [FunPay Bot]: {message}")
     except Exception as e:
         print(f"Ошибка отправки в TG: {e}")
+import sys
+sys.stdout.reconfigure(line_buffering=True)
 
 def main():
     print("Бот запускается...")
