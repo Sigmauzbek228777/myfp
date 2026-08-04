@@ -42,9 +42,7 @@ def funpay_worker():
             proxy=proxy
         ).get()
 
-        print(
-            f"Вход выполнен: {account.username}"
-        )
+        print(f"Вход выполнен: {account.username}")
 
         send_alert(
             f"✅ Бот запущен\n"
@@ -61,19 +59,21 @@ def funpay_worker():
         return
 
 
-    # Получаем категории
     try:
         print("Получение категорий...")
 
         categories = account.get_sorted_categories()
 
         print("====================")
-        print(categories)
+        print("СПИСОК КАТЕГОРИЙ:")
+
+        for category in categories:
+            print(category)
+
         print("====================")
 
         send_alert(
-            "✅ Категории получены.\n"
-            "Проверь логи Render."
+            "✅ Категории выведены в Render."
         )
 
     except Exception as e:
