@@ -16,61 +16,63 @@ bot = telebot.TeleBot(TOKEN)
 
 def send_alert(text):
     try:
-        bot.send_message(ADMIN_ID, f"🤖 [FunPay Bot]\n{text}")
+        bot.send_message(
+            ADMIN_ID,
+            f"🤖 [FunPay Bot]\n{text}"
+        )
     except Exception as e:
-        print("Ошибка Telegram:", e)
+        print("Telegram error:", e)
 
 
 def funpay_worker():
-
-    proxy = None
-
-    if PROXY_URL:
-        proxy = {
-            "http": PROXY_URL,
-            "https": PROXY_URL
-        }
+    print("=== THREAD START ===")
 
     try:
+        proxy = None
+
+        if PROXY_URL:
+            proxy = {
+                "http": PROXY_URL,
+                "https": PROXY_URL
+            }
+
+        print("Создаем Account")
+
         account = Account(
             GOLDEN_KEY,
             proxy=proxy
-        ).get()
+        )
+
+        print("Получаем аккаунт")
+
+        account = account.get()
 
         print("АККАУНТ:", account.username)
 
         send_alert(
-            f"✅ Бот запущен\n{account.username}"
+            f"✅ Вход успешен\n{account.username}"
         )
 
-    except Exception as e:
-        print("Ошибка входа:", repr(e))
-        return
 
-
-    try:
-        print("=== CATEGORY DEBUG ===")
+        print("Получаем категории")
 
         categories = account.get_sorted_categories()
 
-        print("TYPE:")
-        print(type(categories))
+        print("ТИП:", type(categories))
+        print("КАТЕГОРИИ:", repr(categories))
 
-        print("DIR:")
-        print(dir(categories))
-
-        print("REPR:")
-        print(repr(categories))
-
-        print("=== END DEBUG ===")
 
         send_alert(
-            "Категории проверены, смотри Render."
+            "Категории получены. Смотри Render."
         )
 
+
     except Exception as e:
-        print("ОШИБКА:")
+        print("=== ERROR ===")
         print(repr(e))
+        send_alert(
+            f"❌ Ошибка:\n{repr(e)}"
+        )
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -78,7 +80,9 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         self.end_headers()
-        self.wfile.write(b"Bot is running")
+        self.wfile.write(
+            b"Bot is running"
+        )
 
     def do_HEAD(self):
         self.send_response(200)
@@ -87,16 +91,25 @@ class Handler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
 
+    print("MAIN START")
+
     threading.Thread(
         target=funpay_worker,
         daemon=True
     ).start()
 
-    port = int(os.getenv("PORT", 10000))
+    port = int(
+        os.getenv(
+            "PORT",
+            10000
+        )
+    )
 
     server = HTTPServer(
         ("0.0.0.0", port),
         Handler
     )
+
+    print("WEB START", port)
 
     server.serve_forever()
