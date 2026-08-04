@@ -23,7 +23,7 @@ def send_alert(text):
             f"🤖 [FunPay Bot]\n{text}"
         )
     except Exception as e:
-        print("Ошибка Telegram:", e)
+        print("Ошибка Telegram:", e, flush=True)
 
 
 def funpay_worker():
@@ -41,11 +41,19 @@ def funpay_worker():
     try:
         account = Account(
             GOLDEN_KEY,
+            user_agent=(
+                "Mozilla/5.0 "
+                "(Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 "
+                "(KHTML, like Gecko) "
+                "Chrome/120 Safari/537.36"
+            ),
             proxy=proxy
         ).get()
 
+
         print(
-            f"Вход: {account.username}",
+            f"Вход выполнен: {account.username}",
             flush=True
         )
 
@@ -54,62 +62,94 @@ def funpay_worker():
             f"Аккаунт: {account.username}"
         )
 
+
     except Exception as e:
+
+        print(
+            "Ошибка входа:",
+            repr(e),
+            flush=True
+        )
+
         send_alert(
             f"❌ Ошибка входа:\n{repr(e)}"
         )
+
         return
+
 
 
     while True:
 
         try:
-            print("Получаем категории...", flush=True)
-
-            categories = account.get_sorted_categories()
-
-            category_ids = list(categories.keys())
 
             print(
-                f"Найдено категорий: {len(category_ids)}",
+                "Получаем категории...",
                 flush=True
             )
 
 
-            success = 0
+            categories = account.get_sorted_categories()
 
 
-            for category_id in category_ids:
+            ids = list(
+                categories.keys()
+            )
+
+
+            print(
+                f"Найдено категорий: {len(ids)}",
+                flush=True
+            )
+
+
+            good = 0
+
+
+            for category_id in ids:
 
                 try:
-                    account.raise_lots(category_id)
 
                     print(
-                        f"Поднята категория {category_id}",
+                        f"Поднимаем {category_id}",
                         flush=True
                     )
 
-                    success += 1
+
+                    account.raise_lots(
+                        category_id
+                    )
+
+
+                    good += 1
+
+
+                    time.sleep(3)
+
 
                 except Exception as e:
+
                     print(
-                        f"Ошибка категории {category_id}: {e}",
+                        f"Ошибка категории {category_id}: {repr(e)}",
                         flush=True
                     )
 
 
             send_alert(
-                f"✅ Поднятие завершено\n"
-                f"Успешно: {success}/{len(category_ids)}"
+                f"✅ Цикл завершён\n"
+                f"Успешно: {good}/{len(ids)}"
             )
 
 
             print(
-                "Ждем 4 часа...",
+                "Ждём 4 часа...",
                 flush=True
             )
 
-            time.sleep(14400)
+
+            time.sleep(
+                14400
+            )
 
 
         except Exception as e:
@@ -120,30 +160,39 @@ def funpay_worker():
                 flush=True
             )
 
+
             send_alert(
                 f"⚠ Ошибка цикла:\n{repr(e)}"
             )
 
-            time.sleep(60)
+
+            time.sleep(
+                60
+            )
 
 
 
 class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
+
         self.send_response(200)
         self.end_headers()
+
         self.wfile.write(
             b"Bot is running"
         )
 
+
     def do_HEAD(self):
+
         self.send_response(200)
         self.end_headers()
 
 
 
 if __name__ == "__main__":
+
 
     threading.Thread(
         target=funpay_worker,
@@ -166,7 +215,7 @@ if __name__ == "__main__":
 
 
     print(
-        "Web server started",
+        "Server started",
         flush=True
     )
 
