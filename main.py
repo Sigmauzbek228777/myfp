@@ -43,10 +43,12 @@ def main():
         send_alert(f"❌ Ошибка входа:\n{e}")
         return
 
-    print("=== CATEGORIES ===")
-    print(account.categories)
-    print("==================")
+   modal = account.get_raise_modal()
 
+print("=== RAISE MODAL ===")
+print(type(modal))
+print(repr(modal))
+print("===================")
     send_alert("Категории выведены в лог.")
 
 
