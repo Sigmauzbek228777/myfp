@@ -23,6 +23,7 @@ def main():
     print("Запуск бота...")
 
     proxy = None
+
     if PROXY_URL:
         proxy = {
             "http": PROXY_URL,
@@ -43,16 +44,23 @@ def main():
         send_alert(f"❌ Ошибка входа:\n{e}")
         return
 
-   modal = account.get_raise_modal()
+    try:
+        modal = account.get_raise_modal()
 
-print("=== RAISE MODAL ===")
-print(type(modal))
-print(repr(modal))
-print("===================")
-    send_alert("Категории выведены в лог.")
+        print("=== RAISE MODAL ===")
+        print(type(modal))
+        print(repr(modal))
+        print("===================")
+
+        send_alert("Диагностика поднятия лотов завершена.")
+
+    except Exception as e:
+        print(f"Ошибка get_raise_modal: {e}")
+        send_alert(f"⚠ Ошибка получения категорий:\n{e}")
 
 
 class Handler(BaseHTTPRequestHandler):
+
     def do_GET(self):
         self.send_response(200)
         self.end_headers()
