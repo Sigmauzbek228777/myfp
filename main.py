@@ -1,5 +1,4 @@
 import os
-import time
 import telebot
 from FunPayAPI import Account
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -29,7 +28,6 @@ def main():
             "http": PROXY_URL,
             "https": PROXY_URL
         }
-        print("Используется прокси.")
 
     try:
         account = Account(
@@ -45,28 +43,14 @@ def main():
         send_alert(f"❌ Ошибка входа:\n{e}")
         return
 
-      except Exception as e:
-        print(e)
-        send_alert(f"❌ Ошибка входа:\n{e}")
-        return
+    print("=== CATEGORIES ===")
+    print(account.categories)
+    print("==================")
 
-    while True:
-        try:
-            print(account.categories)
-
-            send_alert("Категории выведены в лог.")
-
-            break
-
-        except Exception as e:
-            print(e)
-            send_alert(f"⚠ Ошибка:\n{e}")
-
-            break
+    send_alert("Категории выведены в лог.")
 
 
 class Handler(BaseHTTPRequestHandler):
-
     def do_GET(self):
         self.send_response(200)
         self.end_headers()
